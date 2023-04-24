@@ -1,0 +1,547 @@
+<!DOCTYPE html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HomeFinder</title>
+        <link
+        rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous"
+        />
+        <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"> </script>
+        <style>
+            #container {
+              width: 100%;
+              margin-left: auto;
+              margin-right: auto;
+              background-image: linear-gradient( #f2d57e , #b0d9cd,  #f2d57e );
+            }
+            #header {
+              text-align: center;
+              padding: 10px;
+            }
+            #leftcontainer {
+              float: left;
+              width: 20%;
+              min-height: 1000px;
+            }
+            #content {
+              float: left;
+              width: 35%;
+              min-height: 1000px;
+            }
+            #rightcontainer {
+              float: left;
+              width: 45%;
+              min-height: 1000px;
+            }
+            #footer {
+              clear: both;
+              padding: 3px;
+            }
+            #flbl{
+                margin-left: 25px;
+                margin-right: 10px;
+                font-weight: bold;
+                font-size: 16px;
+            }
+            .lbldb{
+                float:left; 
+                min-width: 100px;
+                margin-top: 5px; 
+                margin-right:10px; 
+                font-weight: bold; 
+                font-size: 18px;
+                text-align: right;
+            }
+            button{
+                font-size: 18px;
+                border-radius: 15px;
+                min-width: 170px;
+            }
+          </style>
+    </head>
+    <body>
+        <div id="container">
+            
+            <div id="header">
+                <img src= "images/logo.jpg" width="100px" style="float: left; margin-left: 20px;margin-top: 20px;"/>
+                <h1 style="color: #275954; font-weight: bold; font-family: Arial; margin-top:20px; margin-bottom:30px; margin-right: 100px;">HomeFinder</h1>
+                <h5 style="color: #000; font-weight: bold; font-family: Arial; margin-right: 100px; margin-bottom: 10px;"> Smart real estate application collecting the most up-to-date listings on homes for sale and apartments for rent </h5>
+                </br><hr/>
+            </div>
+
+            <div id="leftcontainer">
+                <!-- <label>id:</label> 3<label id="e_id"></label> <br><br> -->
+                <label id="flbl" style="margin-left: 60px; margin-bottom: 0px;">FILTERS:</label> <hr>
+
+                <label id="flbl">ARMCHAIR:</label><label id="fotel">FALSE</label><br>
+                <label id="flbl">BATHTUB:</label><label id="wanna">FALSE</label><br>
+                <label id="flbl">BED:</label><label id="lozko">FALSE</label><br>
+                <label id="flbl">BEDSIDE TABLE:</label><label id="stolik">FALSE</label><br>
+                <label id="flbl">CHAIR:</label><label id="krzesla">FALSE</label><br>
+                <label id="flbl">COFFEE MACHINE:</label><label id="ekspres">FALSE</label><br>
+                <label id="flbl">DESK:</label><label id="biurko">FALSE</label><br>
+                <label id="flbl">DISHWASHER:</label><label id="zmywarka">FALSE</label><br>
+                <label id="flbl">DRESSER:</label><label id="komoda">FALSE</label><br>
+                <label id="flbl">IRON:</label><label id="zelazko">FALSE</label><br>
+                <label id="flbl">LAMP:</label><label id="lampka">FALSE</label><br>
+                <label id="flbl">MICROWAVE:</label><label id="mikrofala">FALSE</label><br>
+                <label id="flbl">OVEN:</label><label id="piekarnik">FALSE</label><br>
+                <label id="flbl">REFRIGERATOR:</label><label id="lodowka">FALSE</label><br>
+                <label id="flbl">SOFA:</label><label id="kanapa">FALSE</label><br>
+                <label id="flbl">STOVE:</label><label id="kuchenka">FALSE</label><br>
+                <label id="flbl">TABLE:</label><label id="stol">FALSE</label><br>
+                <label id="flbl">TEAPOT:</label><label id="czajnik">FALSE</label><br>
+                <label id="flbl">TV:</label><label id="telewizor">FALSE</label><br>
+                <label id="flbl">VACUUM CLEANER:</label><label id="odkurzacz">FALSE</label><br>
+                <label id="flbl">WARDROBE:</label><label id="szafa">FALSE</label><br>
+                <label id="flbl">WINDOW SHADE:</label><label id="rolety">FALSE</label><br>
+
+                <!-- <button id="Insbtn2" class="btn btn-primary">INSERT ALL TO DB</button>  -->
+                <label id="answerlabel"></label>
+            </div>
+
+            <div id="content">
+                <p style="margin-left: 70px; margin-top: 50px; font-weight: bold;">UPLOAD IMAGE AND DETECT FURNITURES ON IT:</p>
+                <img src="" alt="" id="image" width="400px"  style="margin-left: 70px; margin-top: 10px;" />
+                </br></br>
+                <input type="file" accept="image/*" 
+                    onchange="loadFile(event)" 
+                    name="image" id="file" style=float:left; style="margin-left: 50px;"/>
+                </br></br></br>
+                <!-- <button onclick="loadFile2()" class="btn btn-primary">LoadFile</button>    -->
+                
+                <button onclick="predict()" class="btn btn-primary" style="background-color: #275954;  margin-left: 50px;">PREDICT</button>
+                
+                </br></br>
+                <label style="margin-left: 50px;">Answer: </label>
+                <label id="answer"></label></br></br>
+                <button id="getLabels" onclick="GetLabels()" class="btn btn-primary" style="background-color: #275954; margin-left: 50px;" >GET LABELS</button> </br></br>
+            </div>
+            
+            <div id="rightcontainer">
+                </br>
+                <label class="lbldb">ID</label>
+                <input id="idbox" class="form-control" type="text" value=""style=" width:80%"/> 
+
+                <hr />
+                <button id="Insertbtn" class="btn btn-primary"  style="background-color: #275954;">INSERT</button>
+                <button id="Selbtn" class="btn btn-primary"  style="background-color: #275954;">SELECT</button>
+                <button id="Updbtn" class="btn btn-primary"  style="background-color: #275954;">UPDATE</button>
+                <button id="Delbtn" class="btn btn-primary"  style="background-color: #275954;">DELETE</button>
+                <hr />
+
+                <label class="lbldb">description</label>
+                <input id="description" class="form-control" type="text" value="" style=" width:80%" /> <br />
+                <label class="lbldb">link</label>
+                <input id="link" class="form-control" type="text" value="" style=" width:80%"/> <br/>
+                <label class="lbldb">localization</label>
+                <input id="localization" class="form-control" type="text"  value="" style=" width:80%"/> <br />
+                <label class="lbldb">price</label>
+                <input id="price" class="form-control" type="text" value="" style=" width:80%"/> <br />
+                <label class="lbldb">title</label>
+                <input id="title" class="form-control" type="text" value="" style=" width:80%"/> <br />
+                <label class="lbldb">city</label>
+                <input id="miejscowosc" class="form-control" type="text" value=""style=" width:80%" /><br />
+                <label class="lbldb">area</label>
+                <input id="area" class="form-control" type="text" value=""style=" width:80%"/><br /><br />
+                
+                <label style="font-weight: bold; margin-left:110px; font-size:18px;">image links:</label><br>
+                <label class="lbldb">1</label><input
+                id="imglink1"
+                class="form-control"
+                type="text"  value=""style=" width:80%"/><button id="load1btn" onclick="loadFile3(document.getElementById('imglink1').value)">LOAD FILE</button>
+                <br /><br />
+                <label class="lbldb">2</label><input
+                id="imglink2"
+                class="form-control"
+                type="text"  value=""style=" width:80%"/><button id="load2btn" onclick="loadFile3(document.getElementById('imglink2').value)">LOAD FILE</button><br /><br />
+                <label class="lbldb">3</label><input
+                    id="imglink3"
+                    class="form-control"
+                    type="text" value=""style=" width:80%"/><button id="load3btn" onclick="loadFile3(document.getElementById('imglink3').value)">LOAD FILE</button><br /><br />
+                <label class="lbldb">4</label><input
+                    id="imglink4"
+                    class="form-control"
+                    type="text" value=""style=" width:80%"/><button id="load4btn" onclick="loadFile3(document.getElementById('imglink4').value)">LOAD FILE</button><br /><br />
+                <label class="lbldb">5</label><input
+                    id="imglink5"
+                    class="form-control"
+                    type="text" value=""style=" width:80%"/><button id="load5btn" onclick="loadFile3(document.getElementById('imglink5').value)">LOAD FILE</button><br /><br />
+                <label class="lbldb">6</label><input
+                    id="imglink6"
+                    class="form-control"
+                    type="text" value=""style=" width:80%"/><button id="load6btn" onclick="loadFile3(document.getElementById('imglink6').value)">LOAD FILE</button><br /><br />
+                <label class="lbldb">7</label><input
+                    id="imglink7"
+                    class="form-control"
+                    type="text" value=""style=" width:80%"/><button id="load7btn" onclick="loadFile3(document.getElementById('imglink7').value)">LOAD FILE</button><br /><br />
+            </div>
+            <div id="footer">
+                <p>Programowanie zespołowe 2021/2022</p>
+            </div>
+        </div>
+
+        <script>
+            let filters = ['desk', 'file, file cabinet, filing cabinet','dining table, board', 'teapot', 'water jug', 'espresso maker', 'espresso', 
+            'studio couch, day bed', 'rocking chair, rocker', 'barber chair', 'pillow', 'quilt, comforter, comfort, puff', 'chest', 'crate', 'chiffonier, commode',
+            'wardrobe, closet, press', 'restaurant, eating house, eating place, eatery', 'folding chair', 'stove', 'rotisserie','microwave, microwave oven',
+            'table lamp', 'vending machine', 'refrigerator, icebox', 'vacuum, vacuum cleaner', 'window shade', 'television, television system', 'monitor',
+            'bathtub, bathing tub, bath, tub', 'dishwasher, dish washer, dishwashing machine', 'iron, smoothing iron']
+            let filter_length = filters.length;
+            let answers = new Array(filter_length).fill(0);
+            
+            let classfilter = ['biurko','czajnik','ekspres','fotel','kanapa', 'komoda','krzesla','kuchenka', 'lampka','lodowka', 'lozko', 
+            'mikrofala','odkurzacz', 'piekarnik', 'rolety', 'stolik', 'stol','szafa','telewizor', 'wanna','zmywarka', 'zelazko']
+            let classfilterAnswers = new Array(classfilter.length).fill(0);
+
+
+            function GetLabels(){
+                var a = document.getElementById("answer").innerHTML;
+                console.log(a);
+                const arr = a.split("'");
+                console.log(arr);
+                for (e in arr){
+                    console.log(arr[e]);
+                    let j = 0
+                    for (let i of filters) {
+                        if(arr[e] == filters[j])
+                        {
+                            answers[j] = 1;
+                        }
+                        j = j+1;
+                    }
+                }
+
+                console.log("----FILTRY-----");
+                j = 0;
+                for (let i of answers) {
+                  console.log(j, filters[j], " ", answers[j]);
+                  j = j+1;
+                }
+                
+                var dict = {};
+                dict["biurko"]="FALSE";dict["czajnik"]="FALSE";dict["ekspres"]="FALSE";dict["fotel"]="FALSE";dict["kanapa"]="FALSE";dict["komoda"]="FALSE";dict["krzesla"]="FALSE";dict["kuchenka"]="FALSE";
+                dict["lampka"]="FALSE";dict["lodowka"]="FALSE";dict["lozko"]="FALSE";dict["mikrofala"]="FALSE";dict["odkurzacz"]="FALSE";dict["piekarnik"]="FALSE";
+                dict["rolety"]="FALSE";dict["stolik"]="FALSE";dict["stol"]="FALSE";dict["szafa"]="FALSE";dict["telewizor"]="FALSE";dict["wanna"]="FALSE";dict["zmywarka"]="FALSE";dict["zelazko"]="FALSE";
+                console.log("----ODPOWIEDZI-----");
+                if(answers[0] == 1 || answers[1] == 1 || answers[2] == 1){classfilterAnswers[0] = 1; document.getElementById("biurko").innerHTML = "TRUE"; dict["biurko"]="TRUE";} //biurko
+                if(answers[3] == 1 || answers[4] == 1 ){classfilterAnswers[1] = 1; document.getElementById("czajnik").innerHTML = "TRUE"; dict["czajnik"]="TRUE";} //czajnik
+                if(answers[5] == 1 || answers[6] == 1 ){classfilterAnswers[2] = 1; document.getElementById("ekspres").innerHTML = "TRUE"; dict["ekspres"]="TRUE";} //ekspres
+                if(answers[7] == 1 || answers[8] == 1 || answers[9] == 1){classfilterAnswers[3] = 1; document.getElementById("fotel").innerHTML = "TRUE"; dict["fotel"]="TRUE";} //fotel
+                if(answers[7] == 1 || answers[10] == 1 || answers[11] == 1){classfilterAnswers[4] = 1; document.getElementById("kanapa").innerHTML = "TRUE"; dict["kanapa"]="TRUE";} //kanapa
+                if(answers[12] == 1 || answers[13] == 1 || answers[14] == 1 || answers[1] == 1 || answers[15] == 1 ){classfilterAnswers[5] = 1; document.getElementById("komoda").innerHTML = "TRUE"; dict["komoda"]="TRUE";} //komoda
+                if(answers[2] == 1 || answers[0] == 1 || answers[16] == 1 || answers[17] == 1 ){classfilterAnswers[6] = 1; document.getElementById("krzesla").innerHTML = "TRUE"; dict["krzesla"]="TRUE";} //krzesla
+                if(answers[18] == 1 || answers[19] == 1 || answers[20] == 1 ){classfilterAnswers[7] = 1; document.getElementById("kuchenka").innerHTML = "TRUE"; dict["kuchenka"]="TRUE";} //kuchenka
+                if(answers[21] == 1){console.log("AAA");classfilterAnswers[8] = 1; document.getElementById("lampka").innerHTML = "TRUE"; dict["lampka"]="TRUE";} //lampka
+                if(answers[22] == 1 || answers[23] == 1){classfilterAnswers[9] = 1; document.getElementById("lodowka").innerHTML = "TRUE"; dict["lodowka"]="TRUE";} //lodowka
+                if(answers[7] == 1 || answers[10] == 1 || answers[11] == 1){classfilterAnswers[10] = 1; document.getElementById("lozko").innerHTML = "TRUE"; dict["lozko"]="TRUE";} //lozko
+                if(answers[20] == 1){classfilterAnswers[11] = 1; document.getElementById("mikrofala").innerHTML = "TRUE"; dict["mikrofala"]="TRUE";} //mikrofala
+                if(answers[24] == 1){classfilterAnswers[12] = 1; document.getElementById("odkurzacz").innerHTML = "TRUE"; dict["odkurzacz"]="TRUE";} //odkurzacz
+                if(answers[20] == 1 || answers[18] == 1){classfilterAnswers[13] = 1; document.getElementById("piekarnik").innerHTML = "TRUE"; dict["piekarnik"]="TRUE";} //piekarnik
+                if(answers[25] == 1){classfilterAnswers[14] = 1; document.getElementById("rolety").innerHTML = "TRUE"; dict["rolety"]="TRUE";} //rolety
+                if(answers[1] == 1 ){classfilterAnswers[15] = 1; document.getElementById("stolik").innerHTML = "TRUE"; dict["stolik"]="TRUE";} //stolik
+                if(answers[2] == 1  || answers[0] == 1 ){classfilterAnswers[16] = 1; document.getElementById("stol").innerHTML = "TRUE"; dict["stol"]="TRUE";} //stol
+                if(answers[15] == 1 ){classfilterAnswers[17] = 1; document.getElementById("szafa").innerHTML = "TRUE"; dict["szafa"]="TRUE";} //szafa
+                if(answers[26] == 1  || answers[27] == 1 ){classfilterAnswers[18] = 1; document.getElementById("telewizor").innerHTML = "TRUE"; dict["telewizor"]="TRUE";} //telewizor
+                if(answers[28] == 1 ){classfilterAnswers[19] = 1; document.getElementById("wanna").innerHTML = "TRUE"; dict["wanna"]="TRUE";} // wanna
+                if(answers[29] == 1 ){classfilterAnswers[20] = 1; document.getElementById("zmywarka").innerHTML = "TRUE"; dict["zmywarka"]="TRUE";} // zmywarka
+                if(answers[30] == 1 ){classfilterAnswers[21] = 1; document.getElementById("zelazko").innerHTML = "TRUE"; dict["zelazko"]="TRUE";} //zelazko
+
+                j = 0;
+                for (let i of classfilterAnswers) {
+                  console.log(j, classfilter[j], " ", classfilterAnswers[j]);
+                  j = j+1;
+                }
+
+                document.getElementById("answerlabel").innerHTML = classfilterAnswers;
+            }
+
+            var loadFile3 = function (source) {
+                load1btn.style.backgroundColor = 'green';
+                console.log(source);
+                source = source.toString();
+                console.log(source);
+                var image = document.getElementById("image");
+                image.crossOrigin = "Anonymous";
+                // image.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRp7mzjU4adAL-yAMql2iwdwqehZftigOIjUA&usqp=CAU"; //'images/cuts/1.1.jpg';
+                image.src = source;
+            };
+
+            var loadFile2 = function () {
+                var image = document.getElementById("image");
+                image.crossOrigin = "Anonymous";
+                // image.src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRp7mzjU4adAL-yAMql2iwdwqehZftigOIjUA&usqp=CAU"; //'images/cuts/1.1.jpg';
+                image.src = "https://ireland.apollo.olxcdn.com:443/v1/files/f1jmcoxp2mfg1-PL/image;s=5760x3840";
+            };
+
+            var loadFile = function (event) {
+                var image = document.getElementById("image");
+                image.src = URL.createObjectURL(event.target.files[0]);
+            };
+            const classifier = ml5.imageClassifier("MobileNet", modelLoaded);
+        
+            function modelLoaded() {
+                console.log("Model Loaded");
+            }
+                    
+            function predict() {
+            classifier.predict(document.getElementById("image"), 
+                function (err, results) {
+                    console.log(results);
+                    console.log(results[0].confidence);
+                    console.log(results[1].confidence > 0.1);
+                    console.log(results[2].confidence > 0.1);
+                    // document.getElementById("answer").innerHTML += "'"+results[0].label+"',"+"'"+results[1].label+"',"+"'"+results[2].label+"',";
+                    
+                    if(results[1].confidence > 0.1 && results[2].confidence > 0.1 ){  
+                        document.getElementById("answer").innerHTML += "'"+results[0].label+"',"+"'"+results[1].label+"',"+"'"+results[2].label+"',"; 
+                        console.log("OK 2");
+                        alert("It's a: " + results[0].label +", "+ "," + results[1].label +", "+ "," + results[2].label);
+                    }
+                    else{
+                        if(results[1].confidence > 0.1 ){
+                            document.getElementById("answer").innerHTML += "'"+results[0].label+"',"+"'"+results[1].label+"',";
+                            console.log("OK 2");
+                            alert("It's a: " + results[0].label +", "+ "," + results[1].label);}
+                        else if(results[2].confidence > 0.1 ){
+                            document.getElementById("answer").innerHTML += "'"+results[0].label+"',"+"'"+results[2].label+"',";
+                            console.log("OK 2");
+                            alert("It's a: "+results[0].label +", "+ "," + results[2].label);
+                        }
+                        else{
+                            document.getElementById("answer").innerHTML += "'"+results[0].label+"',";
+                            alert("It's a: " + results[0].label);
+                        }
+                    }
+                });
+            }
+        </script>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-app.js";
+
+            const firebaseConfig = {
+            apiKey: "AIzaSyB3fb-UUiT5GPwgJTfZJ1RNTXol8d8SMQs",
+            authDomain: "test123-9e346.firebaseapp.com",
+            projectId: "test123-9e346",
+            storageBucket: "test123-9e346.appspot.com",
+            messagingSenderId: "378643291402",
+            appId: "1:378643291402:web:e927e4582791ff06f1eef3",
+            };
+
+            const app = initializeApp(firebaseConfig);
+
+            import {
+            getStorage,
+            ref as sRef,
+            uploadBytesResumable,
+            getDownloadURL,
+            } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-storage.js";
+
+            import {
+            getDatabase,
+            ref,
+            set,
+            get,
+            onValue,
+            push,
+            child,
+            update,
+            remove,
+            } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-database.js";
+
+            const db = getDatabase();
+
+            //references
+            var idbox = document.getElementById("idbox");
+            var description = document.getElementById("description");
+            var link = document.getElementById("link");
+            var idbox = document.getElementById("idbox");
+            var localization = document.getElementById("localization");
+            var price = document.getElementById("price");
+            var title = document.getElementById("title");
+            var miejscowosc = document.getElementById("miejscowosc");
+            var area = document.getElementById("area");
+            var imglink1 = document.getElementById("imglink1");
+            var imglink2 = document.getElementById("imglink2");
+            var imglink3 = document.getElementById("imglink3");
+            var imglink4 = document.getElementById("imglink4");
+            var imglink5 = document.getElementById("imglink5");
+            var imglink6 = document.getElementById("imglink6");
+            var imglink7 = document.getElementById("imglink7");
+
+
+            var insertBtn = document.getElementById("Insertbtn");
+            var selBtn = document.getElementById("Selbtn");
+            var updBtn = document.getElementById("Updbtn");
+            var delBtn = document.getElementById("Delbtn");
+
+            function getFilters(){
+                var a = document.getElementById("answerlabel").innerHTML;
+                const arr = a.split(",");
+                var dict = {};
+                dict["isDesk"]="FALSE";dict["isTeapot"]="FALSE";dict["isEspressoMaker"]="FALSE";dict["isArmchair"]="FALSE";dict["isSofa"]="FALSE";dict["isCommode"]="FALSE";dict["isChairs"]="FALSE";dict["isStove"]="FALSE";
+                dict["isTableLamp"]="FALSE";dict["isRefrigerator"]="FALSE";dict["isBed"]="FALSE";dict["isMicrowave"]="FALSE";dict["isVacuum"]="FALSE";dict["isOven"]="FALSE";
+                dict["isWindowShade"]="FALSE";dict["isBedsideTable"]="FALSE";dict["isTable"]="FALSE";dict["isWardrobe"]="FALSE";dict["isTV"]="FALSE";dict["isBathtub"]="FALSE";dict["isDishwasher"]="FALSE";dict["isIron"]="FALSE";
+                let classfilter = ['isDesk','isTeapot','isEspressoMaker','isArmchair','isSofa', 'isCommode','isChairs','isStove', 'isTableLamp','isRefrigerator', 'isBed', 
+                'isMicrowave','isVacuum', 'isOven', 'isWindowShade', 'isBedsideTable', 'isTable','isWardrobe','isTV', 'isBathtub','isDishwasher', 'isIron']
+             
+                for (let i = 0; i < arr.length; i++) {
+                  if(arr[i]=="1"){
+                    dict[classfilter[i]]= "TRUE"
+                  }
+                }
+                return dict;
+            }
+
+            function InsertData() {
+                // const id = push(child(ref(db), "announcement")).key;
+            set(ref(db, "announcement/" + idbox.value), {
+                description: description.value,
+                link: link.value,
+                id: idbox.value,
+                localization: localization.value,
+                price: price.value,
+                title: title.value,
+                area: area.value,
+                adress: { miejscowosc: miejscowosc.value },
+                imageLinks: [imglink1.value, imglink2.value, imglink3.value, imglink4.value, imglink5.value, imglink6.value, imglink7.value],
+                // filters: getFilters(),
+            })
+                .then(() => {
+                    if(imglink1.value.length>1){load1btn.disabled = false;}
+                    if(imglink2.value.length>1){load2btn.disabled = false;}
+                    if(imglink3.value.length>1){load3btn.disabled = false;}
+                    if(imglink4.value.length>1){load4btn.disabled = false;}
+                    if(imglink5.value.length>1){load5btn.disabled = false;}
+                    if(imglink6.value.length>1){load6btn.disabled = false;}
+                    if(imglink7.value.length>1){load7btn.disabled = false;}
+                    alert("data stored successfully");
+                })
+                .catch((error) => {
+                    alert("data not stored " + error);
+                });
+            }
+
+            function SelectData() {
+            const dbref = ref(db);
+            get(child(dbref, "announcement/" + idbox.value))
+                .then((snapshot) => {
+                if (snapshot.exists()) {
+                    description.value = snapshot.val().description;
+                    link.value = snapshot.val().link;
+                    localization.value = snapshot.val().localization;
+                    price.value = snapshot.val().price;
+                    title.value = snapshot.val().title;
+                    area.value = snapshot.val().area;
+                    miejscowosc.value = snapshot.val().adress["miejscowosc"];
+                    imglink1.value = snapshot.val().imageLinks[0];
+                    imglink2.value = snapshot.val().imageLinks[1];
+                    imglink3.value = snapshot.val().imageLinks[2];
+                    imglink4.value = snapshot.val().imageLinks[3];
+                    imglink5.value = snapshot.val().imageLinks[4];
+                    imglink6.value = snapshot.val().imageLinks[5];
+                    imglink7.value = snapshot.val().imageLinks[6];
+                    
+                    if(imglink1.value.length>1){load1btn.disabled = false;}
+                    if(imglink2.value.length>1){load2btn.disabled = false;}
+                    if(imglink3.value.length>1){load3btn.disabled = false;}
+                    if(imglink4.value.length>1){load4btn.disabled = false;}
+                    if(imglink5.value.length>1){load5btn.disabled = false;}
+                    if(imglink6.value.length>1){load6btn.disabled = false;}
+                    if(imglink7.value.length>1){load7btn.disabled = false;}
+
+                } else {
+                    alert("no data found");
+                }
+                })
+                .catch((error) => {
+                alert(" " + error);
+                });
+            }
+
+            function UpdateData() {
+            getFilters();
+
+            update(ref(db, "announcement/" + idbox.value), {
+                // description: description.value,
+                // link: link.value,
+                // localization: localization.value,
+                // price: price.value,
+                // title: title.value,
+                // area: area.value,
+                // adress: { miejscowosc: miejscowosc.value },
+                // imageLinks: [imglink1.value, imglink2.value, imglink3.value, imglink4.value, imglink5.value, imglink6.value, imglink7.value],
+                furnishes: getFilters(),
+            })
+                .then(() => {
+                alert("data updated successfully");
+                })
+                .catch((error) => {
+                alert("data not udpdated " + error);
+                });
+            }
+
+            function DeleteData() {
+            remove(ref(db, "announcement/" + idbox.value))
+                .then(() => {
+                alert("data removed successfully");
+                })
+                .catch((error) => {
+                alert("data not removed " + error);
+                });
+            }
+
+            console.log("przed");
+            insertBtn.addEventListener("click", InsertData);
+            selBtn.addEventListener("click", SelectData);
+            updBtn.addEventListener("click", UpdateData);
+            delBtn.addEventListener("click", DeleteData);
+
+            function setUP(){
+                load1btn.disabled = true;
+                load2btn.disabled = true;
+                load3btn.disabled = true;
+                load4btn.disabled = true;
+                load5btn.disabled = true;
+                load6btn.disabled = true;
+                load7btn.disabled = true;
+            }
+            window.onload = setUP;
+
+            async function GetAllDataRealtime() {
+                const dbRef = ref(db, "announcement");
+                onValue(dbRef, (snapshot) => {
+                var s = [];
+                console.log(snapshot);
+                snapshot.forEach((childSnapshot) => {
+                    console.log(childSnapshot.key);
+                    s.push(childSnapshot.val());
+                });
+                console.log(s);
+                });
+            }
+            // window.onload = GetAllDataRealtime;
+
+            const btn1 = document.getElementById('load1btn');
+            btn1.addEventListener('click', function onClick() {btn1.style.backgroundColor = 'green';});
+            const btn2 = document.getElementById('load2btn');
+            btn2.addEventListener('click', function onClick() {btn2.style.backgroundColor = 'green';});
+            const btn3 = document.getElementById('load3btn');
+            btn3.addEventListener('click', function onClick() {btn3.style.backgroundColor = 'green';});
+            const btn4 = document.getElementById('load4btn');
+            btn4.addEventListener('click', function onClick() {btn4.style.backgroundColor = 'green';});
+            const btn5 = document.getElementById('load5btn');
+            btn5.addEventListener('click', function onClick() {btn5.style.backgroundColor = 'green';});
+            const btn6 = document.getElementById('load6btn');
+            btn6.addEventListener('click', function onClick() {btn6.style.backgroundColor = 'green';});
+            const btn7 = document.getElementById('load7btn');
+            btn7.addEventListener('click', function onClick() {btn7.style.backgroundColor = 'green';});
+
+        </script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 
+    </body>
+</html>
